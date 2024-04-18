@@ -100,7 +100,9 @@ export default class WindowData {
 
   public listeners = {
     onMouseDown: (event: MouseEvent, windows: WindowData[]) => {
-      this.update.toTop(windows);
+      if (event.buttons > 0) {
+        this.update.toTop(windows);
+      }
     },
   };
 
@@ -133,11 +135,10 @@ export default class WindowData {
         if (window === this) {
           continue;
         }
+        // @ts-ignore
         if (window.zIndex > this.zIndex.value) {
-          // console.log(window);
+          // @ts-ignore
           window.update.zIndex(window.zIndex - 1);
-        } else {
-          // console.log(window.zIndex, this.zIndex.value);
         }
       }
       // move the window to the top of the stack

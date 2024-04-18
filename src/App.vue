@@ -5,6 +5,7 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 
 // Ignore the type error, typescript bugging out
+// @ts-ignore
 const windows: Ref<WindowData[]> = ref<WindowData[]>([
   new WindowData('Vue.js', 'https://vuejs.org/images/logo.png'),
   new WindowData('Vue.js 2', 'https://vuejs.org/images/logo.png')
@@ -43,6 +44,7 @@ const close = (windowData: WindowData) => {
         <li v-for="windowData in  windows " :key="windowData.id">
           <button class="bg-slate-300 p-2 rounded-md relative overflow-hidden" :title="windowData.title">
             <img class="w-6 h-6" :src="windowData.icon" :alt="windowData.title" @click="() => {
+        // @ts-ignore
         if (windowData.zIndex !== windows.length && !windowData.minimized) {
           // instead of minimizing, focus if not already focused
           windowData.update.toTop(windows)
