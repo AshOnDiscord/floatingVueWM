@@ -1,105 +1,61 @@
 <script setup lang="ts">
 import { MinusIcon, Square2StackIcon, XMarkIcon } from "@heroicons/vue/24/outline"
 import { onMounted, ref } from "vue"
+import WindowData from "../ts/WindowData"
 
 const props = defineProps<{
-  icon: string
-  title: string
+  data: WindowData
+  windows: WindowData[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'close'): void
+  (e: "close"): void
 }>()
 
-const windowRef = ref<HTMLElement | null>(null);
-
-const position = ref<{ x: number, y: number }>({ x: 10, y: 10 })
-const setPosition = ({ x, y }: { x?: number, y?: number }) => {
-  // make sure the window is not moved outside the screen
-  if (x !== undefined) {
-    position.value.x = Math.min(Math.max(0, x), window.innerWidth - size.value.width)
-  }
-  if (y !== undefined) {
-    position.value.y = Math.min(Math.max(0, y), window.innerHeight - size.value.height)
-  }
-}
-const updatePosition = () => {
-  if (windowRef.value) {
-    windowRef.value.style.left = `${position.value.x}px`
-    windowRef.value.style.top = `${position.value.y}px`
-  }
-}
-
-const size = ref<{ width: number, height: number }>({ width: window.innerWidth / 4, height: window.innerHeight / 4 })
-const updateSize = () => {
-  if (windowRef.value) {
-    windowRef.value.style.width = `${size.value.width}px`
-    windowRef.value.style.height = `${size.value.height}px`
-  }
-}
-
-const beingDragged = ref(false)
-const draggedPosition = ref<{ x: number, y: number }>({ x: 0, y: 0 })
-const originalPosition = ref<{ x: number, y: number }>({ x: 0, y: 0 })
-
-const mousedown = (event: MouseEvent) => {
-  if (event.button === 0) {
-    event.preventDefault()
-    beingDragged.value = true
-    draggedPosition.value = { x: event.clientX, y: event.clientY }
-    originalPosition.value = { x: position.value.x, y: position.value.y }
-    document.addEventListener('mousemove', mousemove)
-    document.addEventListener('mouseup', mouseup)
-  }
-}
-const mouseup = (event: MouseEvent) => {
-  if (event.button === 0) {
-    event.preventDefault()
-    beingDragged.value = false
-    document.removeEventListener('mousemove', mousemove)
-  }
-}
-
-const mousemove = (event: MouseEvent) => {
-  if (beingDragged.value) {
-    // do not use event.movement_ as they cause desync as they are relative not absolute positions
-    // instead manually calculate based off the original mouse position on mousedown and the current mouse position
-    // it'll also preserve the drag point when the position is being limited to the screen
-    setPosition({
-      x: event.clientX - (draggedPosition.value.x - originalPosition.value.x),
-      y: event.clientY - (draggedPosition.value.y - originalPosition.value.y),
-    })
-    updatePosition()
-  }
-}
+const element = ref<HTMLElement | null>(null)
+const titleBar = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  updateSize()
-  updatePosition()
+  props.data.updateElement(element.value!)
+  props.data.updateTitleBar(titleBar.value!)
+  props.data.onMounted()
 })
 
 </script>
 
 <template>
-  <div class="window border-slate-200 border-2 shadow fixed" ref="windowRef">
-    <nav class="flex justify-between bg-slate-200 px-2 py-1 text-slate-800" @mousedown="mousedown">
+  <div
+    class="window border-slate-200 border-2 shadow absolute bg-white resize overflow-hidden min-w-48 min-h-32 grid grid-rows-[auto,1fr]"
+    ref="element" @mousedown="(event) => props.data.listeners.onMouseDown(event, props.windows)">
+    <nav class="flex justify-between bg-slate-200 px-2 py-1 text-slate-800" ref="titleBar"
+      @mousedown="(event) => props.data.dragListeners.onMouseDown(event, props.windows)"
+      @dblclick="props.data.dragListeners.onDoubleClick">
       <div class="flex gap-2">
-        <img :src="props.icon" alt="" class="w-6 h-6">
-        <span>{{ props.title }}</span>
+        <img :src="props.data.icon" alt="" class="w-6 h-6">
+        <span>{{ props.data.title }}</span>
       </div>
       <!-- Prevent bubbling -->
-      <div class="text-slate-600" @click="(e) => e.preventDefault()">
-        <button>
-          <MinusIcon class="w-6 h-6" />
+      <div class="text-slate-600 *:rounded-full *:p-1" @click="(e) => e.preventDefault()">
+        <button class="hover:bg-green-500 hover:text-white"
+          @click="() => props.data.titleButtons.minimize(props.windows)">
+          <MinusIcon class="w-4 h-4" />
         </button>
-        <button>
-          <Square2StackIcon class="w-6 h-6" />
+        <button class="hover:bg-yellow-500 hover:text-white" @click="props.data.titleButtons.maximize">
+          <Square2StackIcon class="w-4 h-4" v-if="!props.data.maximized" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+            stroke="currentColor" class="w-4 h-4" v-else>
+            <path strokeLinecap="round" strokeLinejoin="round"
+              d="M 7.5 14.25 M 6 20.25 h 12 A 2.25 2.25 0 0 0 20.25 18 V 6 A 2.25 2.25 0 0 0 18 3.75 H 6 A 2.25 2.25 0 0 0 3.75 6 v 12 A 2.25 2.25 0 0 0 6 20.25 Z" />
+          </svg>
         </button>
-        <button>
-          <XMarkIcon class="w-6 h-6" @click="emit('close')" />
+
+        <button class="hover:bg-red-500 hover:text-white" @click="emit('close')">
+          <XMarkIcon class="w-4 h-4" />
         </button>
       </div>
     </nav>
-    <slot></slot>
+    <main class="overflow-scroll">
+      <slot></slot>
+    </main>
   </div>
 </template>
