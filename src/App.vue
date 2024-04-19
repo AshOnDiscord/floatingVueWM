@@ -38,7 +38,6 @@ Odio tempor orci dapibus ultrices. Lorem donec massa sapien faucibus et molestie
 
 const windows = shallowRef<Window[]>([
   createWindow('Lorem Ipsum', '/dist/vite.svg', () => h("p", lorem)),
-  // createWindow('My Computer', 'https://cdn-icons-png.flaticon.com/512/1828/1828843.png', () => h("p", lorem)),
 ])
 
 console.log(windows.value)
@@ -50,12 +49,20 @@ const wallpaper = ref("https://cdn.wallpaperhub.app/cloudcache/2/b/c/3/7/5/2bc37
 <template>
   <div class="w-screen h-screen grid grid-rows-[1fr,min-content]">
     <div id="workspace" class="bg-cover bg-center w-screen relative" :style="{ backgroundImage: `url(${wallpaper})` }">
-      <!-- <Desktop /> -->
+      <Desktop />
       <div id="windows">
         <WindowComponent v-for="window in windows" :key="window.props.id" :props="window.props"
           :children="window.children" />
       </div>
     </div>
-    <nav id="taskbar" class="h-4"></nav>
+    <nav id="taskbar" class="px-3 py-2">
+      <ul class="flex gap-2">
+        <li v-for="window in windows" :key="window.props.id">
+          <button class="p-2 rounded-md hover:bg-slate-200">
+            <img :src="window.props.icon" class="h-6 w-6" />
+          </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
