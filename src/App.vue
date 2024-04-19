@@ -37,7 +37,7 @@ Sit amet aliquam id diam maecenas. Ante metus dictum at tempor commodo. Non diam
 Odio tempor orci dapibus ultrices. Lorem donec massa sapien faucibus et molestie ac feugiat. Lacus sed turpis tincidunt id aliquet. Amet nisl purus in mollis nunc sed id. Ut sem nulla pharetra diam sit amet. Enim ut tellus elementum sagittis vitae. Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Nec ultrices dui sapien eget mi proin sed libero enim. Lacus sed turpis tincidunt id aliquet risus feugiat in. Feugiat scelerisque varius morbi enim nunc faucibus a pellentesque. Cras semper auctor neque vitae tempus quam pellentesque. Orci phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Orci ac auctor augue mauris augue. Non consectetur a erat nam at lectus urna. Placerat vestibulum lectus mauris ultrices eros. Cursus sit amet dictum sit amet. Sed vulputate mi sit amet mauris commodo quis imperdiet. Vitae et leo duis ut diam quam nulla porttitor massa.`
 
 const windows = shallowRef<Window[]>([
-  createWindow('Lorem Ipsum', '/dist/vite.svg', () => h("p", lorem)),
+  createWindow('Lorem Ipsum', '/vite.svg', () => h("p", lorem)),
 ])
 
 console.log(windows.value)
