@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import WindowComponent from './components/WindowComponent.vue';
-import Desktop from './components/Desktop.vue';
+import WindowComponent from "./components/WindowComponent.vue";
+import Desktop from "./components/Desktop.vue";
 
-import { ref, shallowRef, h } from 'vue';
+import { ref, reactive, h } from "vue";
 
 interface Window {
-  window: object, // WindowComponent
-  children: object, // any component
+  window: object; // WindowComponent
+  children: object; // any component
   props: {
-    id: string,
-    title: string,
-    icon: string,
-  }
+    id: string;
+    title: string;
+    icon: string;
+  };
 }
 
 const createWindow = (title: string, icon: string, children: object) => {
@@ -22,9 +22,9 @@ const createWindow = (title: string, icon: string, children: object) => {
       id: Math.random().toString(36).substring(7),
       title,
       icon,
-    }
-  }
-}
+    },
+  };
+};
 
 const lorem = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. In metus vulputate eu scelerisque. Egestas diam in arcu cursus. Egestas integer eget aliquet nibh praesent tristique magna. Mattis rhoncus urna neque viverra justo. Tortor condimentum lacinia quis vel eros. Nec nam aliquam sem et tortor consequat id. Eu feugiat pretium nibh ipsum consequat nisl vel pretium lectus. Quam pellentesque nec nam aliquam sem et tortor consequat id. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum. Elementum nisi quis eleifend quam. In metus vulputate eu scelerisque. Nulla facilisi cras fermentum odio eu. Accumsan sit amet nulla facilisi morbi tempus iaculis. Et tortor at risus viverra adipiscing at.
 
@@ -34,31 +34,63 @@ Proin fermentum leo vel orci. Eget velit aliquet sagittis id consectetur. Ultric
 
 Sit amet aliquam id diam maecenas. Ante metus dictum at tempor commodo. Non diam phasellus vestibulum lorem sed risus ultricies tristique nulla. Volutpat sed cras ornare arcu dui vivamus. Integer feugiat scelerisque varius morbi enim nunc faucibus. Placerat vestibulum lectus mauris ultrices eros in cursus. Commodo odio aenean sed adipiscing diam donec adipiscing tristique risus. Nulla facilisi etiam dignissim diam quis. A iaculis at erat pellentesque adipiscing commodo. Felis bibendum ut tristique et egestas quis. Malesuada nunc vel risus commodo. Gravida in fermentum et sollicitudin ac orci phasellus. Enim diam vulputate ut pharetra sit amet aliquam id diam. Pellentesque elit eget gravida cum.
 
-Odio tempor orci dapibus ultrices. Lorem donec massa sapien faucibus et molestie ac feugiat. Lacus sed turpis tincidunt id aliquet. Amet nisl purus in mollis nunc sed id. Ut sem nulla pharetra diam sit amet. Enim ut tellus elementum sagittis vitae. Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Nec ultrices dui sapien eget mi proin sed libero enim. Lacus sed turpis tincidunt id aliquet risus feugiat in. Feugiat scelerisque varius morbi enim nunc faucibus a pellentesque. Cras semper auctor neque vitae tempus quam pellentesque. Orci phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Orci ac auctor augue mauris augue. Non consectetur a erat nam at lectus urna. Placerat vestibulum lectus mauris ultrices eros. Cursus sit amet dictum sit amet. Sed vulputate mi sit amet mauris commodo quis imperdiet. Vitae et leo duis ut diam quam nulla porttitor massa.`
+Odio tempor orci dapibus ultrices. Lorem donec massa sapien faucibus et molestie ac feugiat. Lacus sed turpis tincidunt id aliquet. Amet nisl purus in mollis nunc sed id. Ut sem nulla pharetra diam sit amet. Enim ut tellus elementum sagittis vitae. Sapien et ligula ullamcorper malesuada proin libero nunc consequat. Nec ultrices dui sapien eget mi proin sed libero enim. Lacus sed turpis tincidunt id aliquet risus feugiat in. Feugiat scelerisque varius morbi enim nunc faucibus a pellentesque. Cras semper auctor neque vitae tempus quam pellentesque. Orci phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Orci ac auctor augue mauris augue. Non consectetur a erat nam at lectus urna. Placerat vestibulum lectus mauris ultrices eros. Cursus sit amet dictum sit amet. Sed vulputate mi sit amet mauris commodo quis imperdiet. Vitae et leo duis ut diam quam nulla porttitor massa.`;
 
-const windows = shallowRef<Window[]>([
-  createWindow('Lorem Ipsum', '/vite.svg', () => h("p", lorem)),
-])
+const windows = reactive<Window[]>([
+  createWindow("Lorem Ipsum", "/vite.svg", () => h("p", lorem)),
+]);
 
-console.log(windows.value)
-console.log(windows.value[0])
+const zIndex = ref<Map<string, number>>(new Map());
 
-const wallpaper = ref("https://cdn.wallpaperhub.app/cloudcache/2/b/c/3/7/5/2bc375a59ea8bb65dbd995b77ab56cbc3107a651.jpg");
+// console.log(windows.value)
+// console.log(windows.value[0])
+
+const wallpaper = ref(
+  "https://cdn.wallpaperhub.app/cloudcache/2/b/c/3/7/5/2bc375a59ea8bb65dbd995b77ab56cbc3107a651.jpg",
+);
 </script>
 
 <template>
-  <div class="w-screen h-screen grid grid-rows-[1fr,min-content]">
-    <div id="workspace" class="bg-cover bg-center w-screen relative" :style="{ backgroundImage: `url(${wallpaper})` }">
+  <div class="grid h-screen w-screen grid-rows-[1fr,min-content]">
+    <div
+      id="workspace"
+      class="relative w-screen bg-cover bg-center"
+      :style="{ backgroundImage: `url(${wallpaper})` }"
+    >
       <Desktop />
       <div id="windows">
-        <WindowComponent v-for="window in windows" :key="window.props.id" :props="window.props"
-          :children="window.children" />
+        <WindowComponent
+          v-for="window in windows"
+          :key="window.props.id"
+          :props="window.props"
+          :children="window.children"
+          :minimized="zIndex.get(window.props.id) === -1"
+          @minimize="
+            (id) => {
+              console.log('minimize', id);
+              zIndex.set(id, -1);
+            }
+          "
+          @close="
+            (id) => {
+              console.log('close', id);
+              windows.splice(
+                windows.findIndex((window) => window.props.id === id),
+                1,
+              );
+              zIndex.delete(id);
+            }
+          "
+        />
       </div>
     </div>
     <nav id="taskbar" class="px-3 py-2">
-      <ul class="flex gap-2">
+      <ul class="flex h-10 gap-2">
         <li v-for="window in windows" :key="window.props.id">
-          <button class="p-2 rounded-md hover:bg-slate-200">
+          <button
+            class="flex gap-2 rounded-md p-2 hover:bg-slate-200"
+            @click="zIndex.set(window.props.id, 1)"
+          >
             <img :src="window.props.icon" class="h-6 w-6" />
           </button>
         </li>
