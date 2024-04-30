@@ -55,24 +55,28 @@ const resize = (position: Vec2dImpl, _direction: Direction) => {
   if (DirectionGroups.north.includes(resizeDirection.value)) {
     edges.value = RSUtils.setTopBounded(edges.value, {
       value: startingEdges.value.top + diff.y,
-      bounds: { min: 0, max: edges.value.bottom - MIN_SIZE.y },
+      min: 0,
+      max: edges.value.bottom - MIN_SIZE.y,
     });
   } else if (DirectionGroups.south.includes(resizeDirection.value)) {
     edges.value = RSUtils.setBottomBounded(edges.value, {
       value: startingEdges.value.bottom + diff.y,
-      bounds: { min: edges.value.top + MIN_SIZE.y, max: window.innerHeight },
+      min: edges.value.top + MIN_SIZE.y,
+      max: window.innerHeight,
     });
   }
 
   if (DirectionGroups.west.includes(resizeDirection.value)) {
     edges.value = RSUtils.setLeftBounded(edges.value, {
       value: startingEdges.value.left + diff.x,
-      bounds: { min: 0, max: edges.value.right - MIN_SIZE.x },
+      min: 0,
+      max: edges.value.right - MIN_SIZE.x,
     });
   } else if (DirectionGroups.east.includes(resizeDirection.value)) {
     edges.value = RSUtils.setRightBounded(edges.value, {
       value: startingEdges.value.right + diff.x,
-      bounds: { min: edges.value.left + MIN_SIZE.x, max: window.innerWidth },
+      min: edges.value.left + MIN_SIZE.x,
+      max: window.innerWidth,
     });
   }
 };

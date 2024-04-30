@@ -12,17 +12,24 @@ interface Bounds {
   max?: number;
 }
 
+// to use the Bounds type you can do
+// {
+//   value,
+//   ...bounds,
+// };
+
 interface BoundedValue {
   value: number;
-  bounds: Bounds;
+  min?: number;
+  max?: number;
 }
 type BV = BoundedValue; // Alias for internal usage in this file
 
 const BoundedValueUtils = {
   bind: (boundedValue: BV): number =>
     Math.min(
-      Math.max(boundedValue.value, boundedValue.bounds.min ?? -Infinity),
-      boundedValue.bounds.max ?? Infinity,
+      Math.max(boundedValue.value, boundedValue.min ?? -Infinity),
+      boundedValue.max ?? Infinity,
     ),
 };
 const BVUtils = BoundedValueUtils; // Alias for internal usage in this file
