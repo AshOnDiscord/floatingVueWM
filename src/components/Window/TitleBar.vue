@@ -60,7 +60,7 @@ const stopDrag = (event: MouseEvent) => {
 </script>
 <template>
   <nav
-    class="flex min-w-max items-stretch justify-between overflow-hidden"
+    class="flex items-stretch justify-between overflow-hidden bg-slate-100"
     @mousedown="startDrag"
   >
     <div class="flex items-center px-2 py-1">
@@ -93,13 +93,3 @@ const stopDrag = (event: MouseEvent) => {
     </div>
   </nav>
 </template>
-
-<style scoped>
-nav {
-  @apply bg-slate-100 shadow-md outline outline-1 outline-slate-200;
-}
-
-* {
-  /* @apply bg-red-500/25 outline outline-1 outline-red-500; */
-}
-</style>

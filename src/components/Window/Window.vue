@@ -4,14 +4,14 @@ import ResizeManager from "./ResizeManager.vue";
 import TitleBarManager from "./TitleBarManager.vue";
 import { Vec2dImpl } from "@/types/Position";
 
-const position = ref(new Vec2dImpl(16, 12));
-const size = ref(new Vec2dImpl(100, 100));
+const MIN_SIZE = new Vec2dImpl(300, 200);
 
-const MIN_SIZE = new Vec2dImpl(100, 100);
+const position = ref(new Vec2dImpl(16, 12));
+const size = ref(new Vec2dImpl(MIN_SIZE.x, MIN_SIZE.y));
 </script>
 <template>
   <main
-    class="absolute overflow-hidden rounded-lg bg-slate-200 shadow-lg"
+    class="absolute rounded-lg bg-slate-200 shadow-lg"
     :style="{
       top: position.y + 'px',
       left: position.x + 'px',
