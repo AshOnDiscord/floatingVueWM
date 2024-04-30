@@ -37,21 +37,15 @@ const stopDragging = (position: Vec2dImpl) => {
 };
 
 const close = () => {
-  alert(
-    "Emit is implemented but not actual closing is implemented in the manager.",
-  );
+  // TODO: Close the window
 };
 
 const maximize = () => {
   maximized.value = !maximized.value;
-  alert(
-    "the emit is fired and recieved (hence how the boolean is toggled) but the window is not actually maximized because I'm lazy",
-  );
 };
 
 const minimize = () => {
   minimized.value = !minimized.value;
-  alert("kekw no taskbar so you can't unminimized w/o vue dev tools lol");
 };
 </script>
 <template>

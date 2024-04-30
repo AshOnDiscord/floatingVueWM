@@ -45,7 +45,7 @@ export class Vec2dImpl implements Vec2d {
     return new Vec2dImpl(arr[0], arr[1]);
   }
 
-  public static fromObject(obj: { x: number; y: number }): Vec2dImpl {
+  public static fromObject(obj: Vec2d): Vec2dImpl {
     return new Vec2dImpl(obj.x, obj.y);
   }
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Direction, { DirectionGroups } from "@/types/Direction";
 import { Vec2dImpl } from "@/types/Position";
-import { RectangleEdgesImpl } from "@/types/RectangleEdges";
+import type { RectangleSides as RectSides } from "@/types/Sides";
+import { RectangleSidesUtils as RSUtils } from "@/types/Sides";
 import Resize from "@components/Window/Resize.vue";
 import { computed, ref } from "vue";
 
@@ -15,19 +16,20 @@ const size = ref(new Vec2dImpl(100, 100));
 const MIN_SIZE = new Vec2dImpl(100, 100);
 
 const edges = computed({
-  get: () => RectangleEdgesImpl.fromVec2dAndSize(position.value, size.value),
-  set: (value: RectangleEdgesImpl) => {
-    if (value.getSize().x < MIN_SIZE.x || value.getSize().y < MIN_SIZE.y) {
+  get: () => RSUtils.fromPositionAndSize(position.value, size.value),
+  set: (value: RectSides) => {
+    const newSize = RSUtils.toSize(value);
+    if (newSize.x < MIN_SIZE.x || newSize.y < MIN_SIZE.y) {
       return alert("Past Bounds!");
     }
 
-    position.value = value.getPosition();
-    size.value = value.getSize();
+    position.value = Vec2dImpl.fromObject(RSUtils.toPosition(value));
+    size.value = Vec2dImpl.fromObject(newSize);
   },
 });
 
 const resizeDirection = ref<Direction>(Direction.empty);
-const startingEdges = ref<RectangleEdgesImpl>(edges.value);
+const startingEdges = ref<RectSides>(edges.value);
 
 const startingPosition = ref<Vec2dImpl | null>(null);
 const currentPosition = ref<Vec2dImpl | null>(null);
@@ -51,38 +53,26 @@ const resize = (position: Vec2dImpl, _direction: Direction) => {
   const diff = cursorDifference.value;
 
   if (DirectionGroups.north.includes(resizeDirection.value)) {
-    edges.value = new RectangleEdgesImpl({
-      ...edges.value,
-      top: Math.min(
-        Math.max(startingEdges.value.top + diff.y, 0),
-        edges.value.bottom - MIN_SIZE.y,
-      ),
+    edges.value = RSUtils.setTopBounded(edges.value, {
+      value: startingEdges.value.top + diff.y,
+      bounds: { min: 0, max: edges.value.bottom - MIN_SIZE.y },
     });
   } else if (DirectionGroups.south.includes(resizeDirection.value)) {
-    edges.value = new RectangleEdgesImpl({
-      ...edges.value,
-      bottom: Math.max(
-        Math.min(startingEdges.value.bottom + diff.y, window.innerHeight),
-        edges.value.top + MIN_SIZE.y,
-      ),
+    edges.value = RSUtils.setBottomBounded(edges.value, {
+      value: startingEdges.value.bottom + diff.y,
+      bounds: { min: edges.value.top + MIN_SIZE.y, max: window.innerHeight },
     });
   }
 
   if (DirectionGroups.west.includes(resizeDirection.value)) {
-    edges.value = new RectangleEdgesImpl({
-      ...edges.value,
-      left: Math.min(
-        Math.max(startingEdges.value.left + diff.x, 0),
-        edges.value.right - MIN_SIZE.x,
-      ),
+    edges.value = RSUtils.setLeftBounded(edges.value, {
+      value: startingEdges.value.left + diff.x,
+      bounds: { min: 0, max: edges.value.right - MIN_SIZE.x },
     });
   } else if (DirectionGroups.east.includes(resizeDirection.value)) {
-    edges.value = new RectangleEdgesImpl({
-      ...edges.value,
-      right: Math.max(
-        Math.min(startingEdges.value.right + diff.x, window.innerWidth),
-        edges.value.left + MIN_SIZE.x,
-      ),
+    edges.value = RSUtils.setRightBounded(edges.value, {
+      value: startingEdges.value.right + diff.x,
+      bounds: { min: edges.value.left + MIN_SIZE.x, max: window.innerWidth },
     });
   }
 };

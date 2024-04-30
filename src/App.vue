@@ -3,7 +3,7 @@ import TitleBarManager from "@components/Window/TitleBarManager.vue";
 import ResizeManager from "@components/Window/ResizeManager.vue";
 import { ref } from "vue";
 
-const titleBar = ref(true);
+const titleBar = ref(false);
 const outline = ref(false);
 </script>
 <template>
