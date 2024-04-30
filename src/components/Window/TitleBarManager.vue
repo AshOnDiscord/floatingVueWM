@@ -47,7 +47,7 @@ const dragging = (position: Vec2dImpl) => {
   newPosition.y = BVUtils.bind({
     value: newPosition.y,
     min: 0,
-    max: window.innerHeight - 24,
+    max: window.innerHeight - props.size.y,
   });
 
   emits("positionChange", newPosition);
