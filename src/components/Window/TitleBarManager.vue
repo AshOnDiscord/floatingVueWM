@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import TitleBar from "@components/Window/TitleBar.vue";
 import { Vec2dImpl } from "@ts/Position";
+import { BoundedValueUtils as BVUtils } from "@/types/Sides";
 import { computed, ref } from "vue";
 
-const window = ref<HTMLElement | null>(null);
+const props = defineProps<{
+  title: string;
+  icon: string;
+  minimized: boolean;
+  maximized: boolean;
+  position: Vec2dImpl;
+  size: Vec2dImpl;
+}>();
 
-const title = ref("Vue.js");
-const icon = ref("/vite.svg");
-const minimized = ref(false);
-const maximized = ref(false);
+const emits = defineEmits<{
+  (e: "minimize"): void;
+  (e: "maximize"): void;
+  (e: "close"): void;
+  (e: "positionChange", position: Vec2dImpl): void;
+}>();
 
 const dragStart = ref<Vec2dImpl | null>(null);
 const dragCurrent = ref<Vec2dImpl | null>(null);
@@ -18,17 +28,29 @@ const dragDistance = computed(() => {
   return dragCurrent.value.sub(dragStart.value);
 });
 
-const windowPosition = ref(new Vec2dImpl(16, 12));
 const windowStart = ref(new Vec2dImpl(0, 0));
 
 const startDragging = (position: Vec2dImpl) => {
   dragStart.value = position;
-  windowStart.value = windowPosition.value;
+  windowStart.value = props.position;
 };
 
 const dragging = (position: Vec2dImpl) => {
   dragCurrent.value = position;
-  windowPosition.value = windowStart.value.add(dragDistance.value);
+
+  const newPosition = windowStart.value.add(dragDistance.value);
+  newPosition.x = BVUtils.bind({
+    value: newPosition.x,
+    min: 0,
+    max: window.innerWidth - props.size.x,
+  });
+  newPosition.y = BVUtils.bind({
+    value: newPosition.y,
+    min: 0,
+    max: window.innerHeight - 24,
+  });
+
+  emits("positionChange", newPosition);
 };
 
 const stopDragging = (position: Vec2dImpl) => {
@@ -37,51 +59,31 @@ const stopDragging = (position: Vec2dImpl) => {
 };
 
 const close = () => {
-  // TODO: Close the window
+  emits("close");
 };
 
 const maximize = () => {
-  maximized.value = !maximized.value;
+  emits("maximize");
 };
 
 const minimize = () => {
-  minimized.value = !minimized.value;
+  emits("minimize");
 };
 </script>
 <template>
-  <main
-    ref="window"
-    class="absolute"
-    :style="{ top: windowPosition.y + 'px', left: windowPosition.x + 'px' }"
-  >
-    <TitleBar
-      :title="title"
-      :icon="icon"
-      :maximized="maximized"
-      :class="{
-        'rounded-t-lg': !maximized,
-        hidden: minimized,
-      }"
-      @minimize="minimize"
-      @maximize="maximize"
-      @close="close"
-      @start-dragging="startDragging"
-      @dragging="dragging"
-      @stop-dragging="stopDragging"
-    />
-    <div class="absolute w-max">
-      <div>
-        <p>Start: {{ dragStart || "(0, 0)" }}</p>
-        <p>Current: {{ dragCurrent }}</p>
-        <p>Distance: {{ dragDistance }}</p>
-      </div>
-      <div>
-        <p>maximized: {{ maximized }}</p>
-      </div>
-    </div>
-  </main>
-  <div class="absolute bottom-0 right-0">
-    <p>Window Position: {{ windowPosition }}</p>
-    <p>Drag Start: {{ windowStart }}</p>
-  </div>
+  <TitleBar
+    :title="title"
+    :icon="icon"
+    :maximized="maximized"
+    :class="{
+      'rounded-t-lg': !maximized,
+      hidden: minimized,
+    }"
+    @minimize="minimize"
+    @maximize="maximize"
+    @close="close"
+    @start-dragging="startDragging"
+    @dragging="dragging"
+    @stop-dragging="stopDragging"
+  />
 </template>

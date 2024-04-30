@@ -7,24 +7,26 @@ import Resize from "@components/Window/Resize.vue";
 import { computed, ref } from "vue";
 
 const props = defineProps<{
-  outline: boolean;
+  position: Vec2dImpl;
+  size: Vec2dImpl;
+  MIN_SIZE: Vec2dImpl;
 }>();
 
-const position = ref(new Vec2dImpl(16, 12));
-const size = ref(new Vec2dImpl(100, 100));
-
-const MIN_SIZE = new Vec2dImpl(100, 100);
+const emits = defineEmits<{
+  (e: "positionChange", position: Vec2dImpl): void;
+  (e: "sizeChange", size: Vec2dImpl): void;
+}>();
 
 const edges = computed({
-  get: () => RSUtils.fromPositionAndSize(position.value, size.value),
+  get: () => RSUtils.fromPositionAndSize(props.position, props.size),
   set: (value: RectSides) => {
     const newSize = RSUtils.toSize(value);
-    if (newSize.x < MIN_SIZE.x || newSize.y < MIN_SIZE.y) {
+    if (newSize.x < props.MIN_SIZE.x || newSize.y < props.MIN_SIZE.y) {
       return alert("Past Bounds!");
     }
 
-    position.value = Vec2dImpl.fromObject(RSUtils.toPosition(value));
-    size.value = Vec2dImpl.fromObject(newSize);
+    emits("positionChange", Vec2dImpl.fromObject(RSUtils.toPosition(value)));
+    emits("sizeChange", Vec2dImpl.fromObject(newSize));
   },
 });
 
@@ -50,35 +52,39 @@ const startResize = (position: Vec2dImpl, direction: Direction) => {
 const resize = (position: Vec2dImpl, _direction: Direction) => {
   currentPosition.value = position;
 
+  let localEdges = edges.value;
+
   const diff = cursorDifference.value;
 
   if (DirectionGroups.north.includes(resizeDirection.value)) {
-    edges.value = RSUtils.setTopBounded(edges.value, {
+    localEdges = RSUtils.setTopBounded(localEdges, {
       value: startingEdges.value.top + diff.y,
       min: 0,
-      max: edges.value.bottom - MIN_SIZE.y,
+      max: edges.value.bottom - props.MIN_SIZE.y,
     });
   } else if (DirectionGroups.south.includes(resizeDirection.value)) {
-    edges.value = RSUtils.setBottomBounded(edges.value, {
+    localEdges = RSUtils.setBottomBounded(localEdges, {
       value: startingEdges.value.bottom + diff.y,
-      min: edges.value.top + MIN_SIZE.y,
+      min: edges.value.top + props.MIN_SIZE.y,
       max: window.innerHeight,
     });
   }
 
   if (DirectionGroups.west.includes(resizeDirection.value)) {
-    edges.value = RSUtils.setLeftBounded(edges.value, {
+    localEdges = RSUtils.setLeftBounded(localEdges, {
       value: startingEdges.value.left + diff.x,
       min: 0,
-      max: edges.value.right - MIN_SIZE.x,
+      max: edges.value.right - props.MIN_SIZE.x,
     });
   } else if (DirectionGroups.east.includes(resizeDirection.value)) {
-    edges.value = RSUtils.setRightBounded(edges.value, {
+    localEdges = RSUtils.setRightBounded(localEdges, {
       value: startingEdges.value.right + diff.x,
-      min: edges.value.left + MIN_SIZE.x,
+      min: edges.value.left + props.MIN_SIZE.x,
       max: window.innerWidth,
     });
   }
+
+  edges.value = localEdges;
 };
 
 const stopResize = (position: Vec2dImpl, _direction: Direction) => {
@@ -88,32 +94,9 @@ const stopResize = (position: Vec2dImpl, _direction: Direction) => {
 };
 </script>
 <template>
-  <main
-    class="absolute"
-    :class="{ 'bg-red-500': props.outline }"
-    :style="{
-      top: position.y + 'px',
-      left: position.x + 'px',
-      width: size.x + 'px',
-      height: size.y + 'px',
-    }"
-  >
-    <Resize
-      @startResize="startResize"
-      @resize="resize"
-      @stopResize="stopResize"
-      :outline="props.outline"
-    />
-    <div class="absolute w-max">
-      <p>Position: {{ position }}</p>
-      <p>Size: {{ size }}</p>
-      <p>Edges: {{ edges }}</p>
-    </div>
-  </main>
-  <div class="absolute bottom-0 right-0">
-    <p>Starting Position: {{ startingPosition || "(0, 0)" }}</p>
-    <p>Current Position: {{ currentPosition || "(0, 0)" }}</p>
-    <p>Cursor Difference: {{ cursorDifference }}</p>
-    <p>Resize Direction: {{ resizeDirection || "Null" }}</p>
-  </div>
+  <Resize
+    @startResize="startResize"
+    @resize="resize"
+    @stopResize="stopResize"
+  />
 </template>
